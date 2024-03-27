@@ -1,7 +1,23 @@
+using Microsoft.EntityFrameworkCore;
+using MoskPharmacy.Context;
+using Microsoft.Extensions.Configuration;
+using System.Configuration;
+using Humanizer.Configuration;
+
 var builder = WebApplication.CreateBuilder(args);
+
+
+
+
+builder.Services.AddEntityFrameworkNpgsql().AddDbContext<MoskPharmacyContext>(opt =>
+{
+    opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), x => x.UseNetTopologySuite());
+});
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+
 
 var app = builder.Build();
 
