@@ -12,16 +12,17 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-12">
-                    <div id="map" style="height:800px"></div>
+                    <div id="map" style="height:600px">
+                    </div>
+                    <form id="geoJsonForm" method="post" action="@Url.Action("SaveGeoJson", "Map")">
+                        <textarea type="hidden" id="geoJsonData" name="geoJsonData"> </textarea>
+                        <button type="submit">Save GeoJSON</button>
+                    </form>
                 </div>
-
             </div>
         </div><!-- /.container-fluid -->
     </section>
 </div>
-
-
-
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
@@ -53,29 +54,28 @@
     map.addControl(drawControl);
 
     map.on('draw:created', function (e) {
-        var type = e.layerType,
-            layer = e.layer;
+        var layer = e.layer;
+        drawnItems.addLayer(layer);
+        var geojsonData = JSON.stringify(layer.toGeoJSON()); // GeoJSON verisini JSON formatına dönüştürüyoruz
+        document.getElementById('geoJsonData').value = geojsonData; // Gizli alanın değerini GeoJSON verisiyle dolduruyoruz
+        console.log(geojsonData);
+    });
 
-        if (type === 'polygon' || type === 'polyline' || type === 'rectangle' || type === 'circle' || type === 'marker') {
-            // Çizilen şekli drawnItems katmanına ekleyin
-            drawnItems.addLayer(layer);
+    map.on('draw:editstop', function (e) {
+        if (e.layers) {
+            var layers = e.layers;
+            layers.eachLayer(function (layer) {
+                console.log('Layer edited:', layer);
+            });
         }
     });
 
-
-    map.on('draw:editstop', function (e) {
-        var layers = e.layers;
-        layers.eachLayer(function (layer) {
-            // Düzenlenmiş katmanları burada işleyebilirsiniz
-            console.log('Layer edited:', layer);
-        });
-    });
-
     map.on('draw:deletestop', function (e) {
-        var layers = e.layers;
-        layers.eachLayer(function (layer) {
-            // Silinen katmanları burada işleyebilirsiniz
-            console.log('Layer deleted:', layer);
-        });
+        if (e.layers) {
+            var layers = e.layers;
+            layers.eachLayer(function (layer) {
+                console.log('Layer deleted:', layer);
+            });
+        }
     });
 </script>
