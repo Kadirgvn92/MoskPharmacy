@@ -2,8 +2,11 @@
 using MoskPharmacy.Context;
 using MoskPharmacy.Models;
 using MoskPharmacy.ViewModels;
+using NetTopologySuite.Geometries;
+using NetTopologySuite.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using NuGet.Protocol;
 using System.Text.Json.Nodes;
 
 namespace MoskPharmacy.Controllers;
@@ -23,13 +26,17 @@ public class MapController : Controller
     [HttpPost]
     public IActionResult SaveGeoJson([FromBody] JsonObject geoJsonData)
     {
-
-        var values = new Drawing()
+        var reader = new GeoJsonReader();
+        var geometry = reader.Read<Geometry>(geoJsonData.ToString());
+        // Convert the relevant part of the JsonNode to a Geometry object
+        var drawing = new Drawing
         {
-            Type = geoJsonData.ToString(),
+            Type = geoJsonData["type"].ToString(),
+            Geometry = geometry
         };
+        
 
-        _context.Drawings.Add(values);
+        _context.Drawings.Add(drawing);
         _context.SaveChanges();
 
         return RedirectToAction("Index");

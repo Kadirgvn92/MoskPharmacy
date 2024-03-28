@@ -14,7 +14,7 @@
                 <div class="col-sm-12">
                     <div id="map" style="height:600px">
                     </div>
-                    <button type="submit">Save GeoJSON</button>
+                    <button type="submit" onclick="saveGeoJson()">Save GeoJSON</button>
                 </div>
             </div>
         </div><!-- /.container-fluid -->
@@ -45,7 +45,7 @@
         },
         edit: {
             featureGroup: drawnItems,
-            remove: true, // Düzenleme modu sırasında çizimleri kaldırmaya izin ver
+            remove: true, 
         }
     });
     map.addControl(drawControl);
@@ -55,28 +55,21 @@
 
         drawnItems.addLayer(layer);
 
-        var geojsonData = JSON.stringify(layer.toGeoJSON()); // GeoJSON verisini JSON formatına dönüştürüyoruz
+        var geoJsonObject = layer.toGeoJSON();
 
-        var geojsonObject = JSON.parse(geojsonData);
-
-        // Geometry bilgisini çekmek için
-        var geometry = geojsonObject.geometry;
-        var type = geometry.type;
-        console.log(geometry.type);
+        console.log(geoJsonObject.geometry);
 
         saveGeoJson();
 
         function saveGeoJson() {
 
-            drawnItems.addLayer(layer);
-
-            var geojsonData = layer.toGeoJSON();
+            var datas = JSON.stringify(geoJsonObject.geometry);
 
             $.ajax({
                 url: "/Map/SaveGeoJson/", // Controller action URL'si
                 type: 'POST',
                 contentType: 'application/json',
-                data: geojsonData,
+                data: datas,
                 success: function (response) {
                     // Başarılı işlem durumunda yapılacaklar
                     console.log(response);
@@ -88,8 +81,11 @@
                     alert('Error occurred while saving GeoJSON data.');
                 }
             });
-        }
+        };
     });
+
+    
+
 
     map.on('draw:edited', function (e) {
         if (e.layers) {
