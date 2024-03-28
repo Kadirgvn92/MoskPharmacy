@@ -1,0 +1,62 @@
+﻿@using NetTopologySuite.Geometries
+@using NetTopologySuite.IO
+
+@model List<Drawing>
+
+@{
+    ViewData["Title"] = "GetGeo";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <div id="map" style="height:800px">
+                    </div>
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
+    </section>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<script>
+    var map = L.map('map').setView([40.2201, 28.9896], 12);
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    @foreach (var drawing in Model)
+    {
+        // Geometry'i GeoJSON formatına dönüştür
+        string geoJson = GeometryConverter.WktToGeoJson(drawing.Geometry.ToString());
+
+        // Leaflet haritasına geometriyi ekle
+        <text>
+                    var geoJsonFeature = @Html.Raw(geoJson);
+        L.geoJSON(geoJsonFeature).addTo(map);
+        </text>
+    }
+
+
+    // values.forEach(function (drawing) {
+    //     var geojsonFeature = {
+    //         "type": JSON.parse(drawing.type),
+    //         "geometry": JSON.parse(drawing.geometry) // Assuming drawing.geometry is already in geojson format as a string
+    //     };
+
+    //     L.geoJSON(geojsonFeature).addTo(map);
+    // });
+    
+</script>
+
+

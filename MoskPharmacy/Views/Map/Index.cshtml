@@ -12,9 +12,8 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-12">
-                    <div id="map" style="height:600px">
+                    <div id="map" style="height:800px">
                     </div>
-                    <button type="submit" onclick="saveGeoJson()">Save GeoJSON</button>
                 </div>
             </div>
         </div><!-- /.container-fluid -->
@@ -25,7 +24,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
 
 <script>
-    var map = L.map('map').setView([40.2201, 28.9896], 13);
+    var map = L.map('map').setView([40.2201, 28.9896], 12);
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,

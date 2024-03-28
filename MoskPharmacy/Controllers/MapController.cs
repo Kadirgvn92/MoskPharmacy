@@ -2,11 +2,13 @@
 using MoskPharmacy.Context;
 using MoskPharmacy.Models;
 using MoskPharmacy.ViewModels;
+using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NuGet.Protocol;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace MoskPharmacy.Controllers;
@@ -40,5 +42,13 @@ public class MapController : Controller
         _context.SaveChanges();
 
         return RedirectToAction("Index");
+    }
+    [HttpGet]
+    public IActionResult GetGeo()
+    {
+        var values = _context.Drawings.ToList();
+
+
+        return View(values);
     }
 }

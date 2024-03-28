@@ -58,7 +58,7 @@
     });
 
     map.on('locationfound', function (e) {
-        var userMarker = L.marker(e.latlng, { icon: redIcon }).addTo(map);
+        var userMarker = L.marker(e.latlng).addTo(map);
         userMarker.bindPopup("Konumunuz").openPopup();
     });
 

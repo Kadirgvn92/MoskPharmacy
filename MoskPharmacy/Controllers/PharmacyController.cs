@@ -34,8 +34,6 @@ public class PharmacyController : Controller
                 pharmacyList.Add(pharmacyViewModel);
             }
 
-
-
             return View(pharmacyList);
         }
         return View();
