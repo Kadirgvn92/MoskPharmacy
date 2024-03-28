@@ -4,6 +4,7 @@ using MoskPharmacy.Models;
 using MoskPharmacy.ViewModels;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Text.Json.Nodes;
 
 namespace MoskPharmacy.Controllers;
 public class MapController : Controller
@@ -20,11 +21,17 @@ public class MapController : Controller
         return View();
     }
     [HttpPost]
-    public IActionResult SaveGeoJson([FromBody] JObject geoJsonData)
+    public IActionResult SaveGeoJson([FromBody] JsonObject geoJsonData)
     {
-        var values = JsonConvert.DeserializeObject<List<DrawingViewModel>>(geoJsonData.ToString());
-        
-        
-        return View();
+
+        var values = new Drawing()
+        {
+            Type = geoJsonData.ToString(),
+        };
+
+        _context.Drawings.Add(values);
+        _context.SaveChanges();
+
+        return RedirectToAction("Index");
     }
 }

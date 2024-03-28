@@ -14,10 +14,7 @@
                 <div class="col-sm-12">
                     <div id="map" style="height:600px">
                     </div>
-                    <form id="geoJsonForm" method="post" action="@Url.Action("SaveGeoJson", "Map")">
-                        <textarea type="hidden" id="geoJsonData" name="geoJsonData"> </textarea>
-                        <button type="submit">Save GeoJSON</button>
-                    </form>
+                    <button type="submit">Save GeoJSON</button>
                 </div>
             </div>
         </div><!-- /.container-fluid -->
@@ -55,22 +52,55 @@
 
     map.on('draw:created', function (e) {
         var layer = e.layer;
-        drawnItems.addLayer(layer);
-        var geojsonData = JSON.stringify(layer.toGeoJSON()); // GeoJSON verisini JSON formatına dönüştürüyoruz
-        document.getElementById('geoJsonData').value = geojsonData; // Gizli alanın değerini GeoJSON verisiyle dolduruyoruz
-        console.log(geojsonData);
-    });
 
-    map.on('draw:editstop', function (e) {
-        if (e.layers) {
-            var layers = e.layers;
-            layers.eachLayer(function (layer) {
-                console.log('Layer edited:', layer);
+        drawnItems.addLayer(layer);
+
+        var geojsonData = JSON.stringify(layer.toGeoJSON()); // GeoJSON verisini JSON formatına dönüştürüyoruz
+
+        var geojsonObject = JSON.parse(geojsonData);
+
+        // Geometry bilgisini çekmek için
+        var geometry = geojsonObject.geometry;
+        var type = geometry.type;
+        console.log(geometry.type);
+
+        saveGeoJson();
+
+        function saveGeoJson() {
+
+            drawnItems.addLayer(layer);
+
+            var geojsonData = layer.toGeoJSON();
+
+            $.ajax({
+                url: "/Map/SaveGeoJson/", // Controller action URL'si
+                type: 'POST',
+                contentType: 'application/json',
+                data: geojsonData,
+                success: function (response) {
+                    // Başarılı işlem durumunda yapılacaklar
+                    console.log(response);
+                    alert('GeoJSON data saved successfully.');
+                },
+                error: function (xhr, status, error) {
+                    // Hata durumunda yapılacaklar
+                    console.error(xhr.responseText);
+                    alert('Error occurred while saving GeoJSON data.');
+                }
             });
         }
     });
 
-    map.on('draw:deletestop', function (e) {
+    map.on('draw:edited', function (e) {
+        if (e.layers) {
+            var layers = e.layers;
+            layers.eachLayer(function (layer) {
+                console.log('Layer edited:', layer.toGeoJSON());
+            });
+        }
+    });
+
+    map.on('draw:deleted', function (e) {
         if (e.layers) {
             var layers = e.layers;
             layers.eachLayer(function (layer) {
