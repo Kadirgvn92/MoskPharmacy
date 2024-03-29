@@ -1,0 +1,112 @@
+﻿@using MoskPharmacy.ViewModels
+
+@model List<PharmacyViewModel>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<div class="content-wrapper">
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <div id="map" style="height:800px">
+
+
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://unpkg.com/leaflet-geolocation/dist/leaflet-geolocation.min.js"></script>
+
+<script>
+    var map = L.map('map').setView([40.2201, 28.9896], 13);
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    var userLocationGroup = new L.FeatureGroup().addTo(map);
+    
+    function locateUser(){
+        map.locate({
+            enableHighAccuracy: true,
+            watch:true,
+            maxZoom: 16
+        });
+    }
+   
+    locateUser();
+
+    map.on('locationfound', function (e) {
+        var userMarker = L.marker(e.latlng).addTo(map);
+        userMarker.bindPopup("Konumunuz").openPopup();
+        userLocationGroup.addLayer(userMarker);
+    });
+
+    var locateButton = L.control({ position: 'topright' });
+
+    locateButton.onAdd = function (map) {
+        var div = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+        div.innerHTML = '<button><img src="/loc.png" width="30px" height="32px"/></button>';
+        div.onclick = function () {
+            locateUser();
+        }
+        return div;
+    };
+
+    locateButton.addTo(map);
+
+    var pharmacies = @Html.Raw(Json.Serialize(Model));
+
+    console.log(pharmacies);
+
+    var list = pharmacies.$values;
+
+    console.log(list);
+
+    list.forEach(function (pharmacy) {
+        var locationPharmacy = pharmacy.location.split(',');
+        var latlng = [parseFloat(locationPharmacy[0]), parseFloat(locationPharmacy[1])];
+        var marker = L.marker(latlng, { icon: L.icon({ iconUrl: '/eczane.jpg', iconSize:[30,30]}) }).addTo(map);
+        marker.bindPopup('<b>' + pharmacy.name + '</b><br>' + pharmacy.address + '<br>' + pharmacy.phone + '<br><button class="btn btn-primary btn-xs mt-2" onclick="openGoogleMaps(' + locationPharmacy[0] + ', ' + locationPharmacy[1] + ')">Google Haritalar\'da Görüntüle</button>');
+    });
+
+    function openGoogleMaps(lat, lng) {
+
+        var googleMapsURL = "https://www.google.com/maps/dir/?api=1&destination=" + lat + "," + lng;
+
+        window.open(googleMapsURL, "_blank");
+    };
+
+
+
+    map.on('locationfound', function (e) {
+        var userMarker = L.marker(e.latlng).addTo(map);
+        userMarker.bindPopup("Konumunuz").openPopup();
+    });
+
+   
+
+    var redIcon = L.icon({
+        iconUrl: '/leaf-green.png',
+        shadowUrl: '/leaf-shadow.png',
+
+
+        iconSize: [38, 95], // size of the icon
+        shadowSize: [50, 64], // size of the shadow
+        iconAnchor: [22, 94], // point of the icon which will correspond to marker's location
+        shadowAnchor: [4, 62],  // the same for the shadow
+        popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
+    });
+
+</script>

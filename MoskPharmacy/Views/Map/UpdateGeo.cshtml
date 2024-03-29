@@ -1,0 +1,51 @@
+﻿@model UpdateDrawingViewModel
+
+@{
+    ViewData["Title"] = "UpdateGeo";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="content-wrapper">
+    <div class="midde_cont">
+        <div class="container-fluid">
+            
+            <!-- row -->
+            <div class="row p-4">
+                <div class="col-md-12">
+                    <div class="white_shd full margin_bottom_30">
+                        <div class="full graph_head">
+                            <div class="heading1 mt-2">
+                                <h3>Şekil bilgisini buradan değiştirebilirsiniz.</h3>
+                            </div>
+                        </div>
+                        <div class="table_section padding_infor_info">
+                            <div class="table-responsive-sm">
+                                <!-- table section -->
+                                <form method="post" enctype="multipart/form-data">
+                                    <input type="hidden" asp-for="DrawingId" />
+                                    <input type="hidden" asp-for="Geometry"/>
+                                    <input type="hidden" asp-for="CreatedAt"/>
+                                    <div class="form-group p-1">
+                                        <label>Şekil Adı</label>
+                                        <input type="text" class="form-control form-control-s" asp-for="Name" placeholder="Şekil adı girin">
+                                    </div>
+                                    <div class="form-group p-1">
+                                        <label>Açıklama</label>
+                                        <input type="text" class="form-control form-control-s" asp-for="Description" placeholder="Şekil açıklaması girin">
+                                    </div>
+                                    <div class="form-group p-1">
+                                        <label>Tipi</label>
+                                        <input type="text" class="form-control form-control-s" asp-for="Type" placeholder="Şekil tipini girin">
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary">Şekil Güncelle</button>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,4 +1,6 @@
-﻿@{
+﻿@model List<Drawing>
+
+@{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
@@ -12,22 +14,19 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-12">
-                    <div id="map" style="height:800px"></div>
+                    <div id="map" style="height:800px">
+                    </div>
                 </div>
-
             </div>
         </div><!-- /.container-fluid -->
     </section>
 </div>
 
-
-
-
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
 
 <script>
-    var map = L.map('map').setView([40.2201, 28.9896], 13);
+    var map = L.map('map').setView([40.2201, 28.9896], 12);
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
@@ -47,35 +46,187 @@
         },
         edit: {
             featureGroup: drawnItems,
-            remove: true, // Düzenleme modu sırasında çizimleri kaldırmaya izin ver
+            remove: true,
         }
     });
     map.addControl(drawControl);
 
-    map.on('draw:created', function (e) {
-        var type = e.layerType,
-            layer = e.layer;
+    var drawnGeoJSON;//çizilmiş şekli saklamak için değişken
 
-        if (type === 'polygon' || type === 'polyline' || type === 'rectangle' || type === 'circle' || type === 'marker') {
-            // Çizilen şekli drawnItems katmanına ekleyin
-            drawnItems.addLayer(layer);
+
+    map.on('draw:created', function (e) {
+        var layer = e.layer;
+
+        drawnItems.addLayer(layer);
+
+
+
+        var geoJsonObject = layer.toGeoJSON();
+
+        console.log(geoJsonObject);
+
+        drawnGeoJSON = JSON.stringify(geoJsonObject.geometry);
+
+
+    });
+
+
+    map.on('draw:edited', function (e) {
+        var layers = e.layers;
+        layers.eachLayer(function (layer) {
+
+
+            console.log('Layer edited:', layer.toGeoJSON());
+        });
+    });
+
+    map.on('draw:deleted', function (e) {
+        if (e.layers) {
+            var layers = e.layers;
+            layers.eachLayer(function (layer) {
+                console.log('Layer deleted:', layer);
+            });
         }
     });
 
 
-    map.on('draw:editstop', function (e) {
-        var layers = e.layers;
-        layers.eachLayer(function (layer) {
-            // Düzenlenmiş katmanları burada işleyebilirsiniz
-            console.log('Layer edited:', layer);
+    function createSaveButton() {
+        var saveButton = L.Control.extend({
+            options: {
+                position: 'topright'
+            },
+            onAdd: function (map) {
+                var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+
+                container.innerHTML = '<button onclick="saveGeoJson()">Save</button>';
+
+                return container;
+            }
         });
+
+        map.addControl(new saveButton());
+    }
+
+    // Butona tıklandığında geoJSON'u post etme fonksiyonu
+    function saveGeoJson() {
+        if (drawnGeoJSON) {
+            var datas = drawnGeoJSON;
+
+            $.ajax({
+                url: "/Map/SaveGeoJson/", // Controller action URL'si
+                type: 'POST',
+                contentType: 'application/json',
+                data: datas,
+                success: function (response) {
+                    // Başarılı işlem durumunda yapılacaklar
+                    console.log(response);
+                    alert('GeoJSON data saved successfully.');
+                },
+                error: function (xhr, status, error) {
+                    // Hata durumunda yapılacaklar
+                    console.error(xhr.responseText);
+                    alert('Error occurred while saving GeoJSON data.');
+                }
+            });
+        }
+    }
+
+    // Buton oluşturma işlemini çağır
+    createSaveButton();
+
+    var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: 'Osm Katmanı'
     });
 
-    map.on('draw:deletestop', function (e) {
-        var layers = e.layers;
-        layers.eachLayer(function (layer) {
-            // Silinen katmanları burada işleyebilirsiniz
-            console.log('Layer deleted:', layer);
-        });
+    var osmHOT = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: 'Osm Hot Katmanı'
     });
+
+    var osmFr = L.tileLayer('http://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
+        maxZoom: 19
+    }).addTo(map);
+
+    var baseMaps = {
+        "Osm": osm,
+        "Osm.HOT": osmHOT,
+
+    };
+
+    var overMap = {
+        "Osm.Fr": osmFr
+    };
+
+    var layers = L.control.layers(baseMaps, overMap).addTo(map);
+
+    var geos = L.layerGroup();
+    var polygonGroup = L.layerGroup();
+    var points = L.layerGroup();
+    var lines = L.layerGroup();
+
+    @foreach (var drawing in Model)
+    {
+        // Geometry'i GeoJSON formatına dönüştür
+        string geoJson = GeometryConverter.WktToGeoJson(drawing.Geometry.ToString());
+
+        // Leaflet haritasına geometriyi ekle
+        <text>
+        var geoJsonFeature = @Html.Raw(geoJson);
+
+        var geo = L.geoJSON(geoJsonFeature, {
+            onEachFeature: function (feature, layer) {
+                layer.bindPopup('<b>İsim:</b> @drawing.Name <br> <b>Açıklama:</b> @drawing.Description<br> <a href="/Map/UpdateGeo/@drawing.DrawingId" class="btn btn-xs bg-dark">Güncelle</a>&nbsp; <a href="/Map/DeleteGeo/@drawing.DrawingId" class="btn btn-xs bg-danger">Sil</a>');
+            }
+        });
+        geos.addLayer(geo);
+
+
+        if ('@drawing.Type' === 'Polygon') {
+            layer = L.geoJSON(geoJsonFeature, {
+                style: {
+                    fillColor: 'red',  // Alanın iç rengi
+                    color: 'red',      // Alanın kenar çizgisi rengi
+                    weight: 2          // Alanın kenar çizgisi kalınlığı
+                },
+                onEachFeature: function (feature, layer) {
+                    layer.bindPopup('<b>İsim:</b> @drawing.Name <br> <b>Açıklama:</b> @drawing.Description<br> <a href="/Map/UpdateGeo/@drawing.DrawingId" class="btn btn-xs bg-dark">Güncelle</a>&nbsp; <a href="/Map/DeleteGeo/@drawing.DrawingId" class="btn btn-xs bg-danger">Sil</a>');
+                }
+            });
+            polygonGroup.addLayer(layer);
+        };
+
+        if ('@drawing.Type' === 'Point') {
+            pointLayer = L.geoJSON(geoJsonFeature, {
+                onEachFeature: function (feature, layer) {
+                    layer.bindPopup('<b>İsim:</b> @drawing.Name <br> <b>Açıklama:</b> @drawing.Description<br> <a href="/Map/UpdateGeo/@drawing.DrawingId" class="btn btn-xs bg-dark">Güncelle</a>&nbsp; <a href="/Map/DeleteGeo/@drawing.DrawingId" class="btn btn-xs bg-danger">Sil</a>');
+                }
+            });
+            points.addLayer(pointLayer);
+        };
+
+        if ('@drawing.Type' === 'LineString') {
+            line = L.geoJSON(geoJsonFeature, {
+                style:{
+                    fillColor:'purple',
+                    color:'purple',
+                    weight:6
+                },
+                onEachFeature: function (feature, layer) {
+                    layer.bindPopup('<b>İsim:</b> @drawing.Name <br> <b>Açıklama:</b> @drawing.Description<br> <a href="/Map/UpdateGeo/@drawing.DrawingId" class="btn btn-xs bg-dark">Güncelle</a>&nbsp; <a href="/Map/DeleteGeo/@drawing.DrawingId" class="btn btn-xs bg-danger">Sil</a>');
+                }
+            });
+            lines.addLayer(line);
+        };
+
+
+        </text>
+    };
+
+
+    layers.addOverlay(geos, "Şekiller");
+    layers.addOverlay(polygonGroup, "Alan");
+    layers.addOverlay(points, "Lokasyon");
+    layers.addOverlay(lines, "Düzlem");
 </script>
