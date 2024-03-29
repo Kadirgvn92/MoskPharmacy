@@ -1,11 +1,5 @@
 # MoskPharmacy
 
-Tabii ki, işte bir README.md dosyasının içeriğine benzer bir örnek:
-
----
-
-# Proje Adı
-
 Bu proje, ASP.NET MVC 8 kullanılarak geliştirilmiş bir web uygulamasıdır. Uygulama, Bursa Nilüfer bölgesi üzerinde çeşitli şekiller ve alanlar çizme, bu alanları PostGIS eklentisi ile PostgreSQL veritabanına yükleme ve veritabanından çekme gibi özelliklere sahiptir. Ayrıca, nöbetçi eczanelere ait API'yi kullanarak o günün nöbetçi eczanelerini harita üzerinde gösterme ve kullanıcının konumunu bulma, istenilen eczaneye tıklayarak Google Maps'e yönlendirerek yol tarifi alma yeteneklerini içerir.
 
 ## Özellikler
