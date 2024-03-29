@@ -41,10 +41,15 @@ Bu proje, ASP.NET MVC 8 kullanılarak geliştirilmiş bir web uygulamasıdır. U
 5. Nöbetçi eczaneleri harita üzerinde görüntüleyin.
 6. Konumunuzu bulun ve istediğiniz eczaneye tıklayarak yol tarifi alın.
 
-## Lisans
-
-Bu proje MIT lisansı altında lisanslanmıştır. Daha fazla bilgi için [LICENSE](LICENSE) dosyasına bakınız.
-
----
-
-Bu örnek README dosyası, projenizin temel özelliklerini, kullanılan teknolojileri, kurulum talimatlarını ve kullanım yönergelerini içerir. README dosyasını projenizin gereksinimlerine ve yapılandırmasına göre özelleştirebilirsiniz.
+<img src="https://github.com/Kadirgvn92/MoskPharmacy/blob/master/MoskPharmacy/wwwroot/mosk6.png"></img>
+<br>
+<img src="https://github.com/Kadirgvn92/MoskPharmacy/blob/master/MoskPharmacy/wwwroot/mosk5.png"></img>
+<br>
+<img src="https://github.com/Kadirgvn92/MoskPharmacy/blob/master/MoskPharmacy/wwwroot/mosk4.png"></img>
+<br>
+<img src="https://github.com/Kadirgvn92/MoskPharmacy/blob/master/MoskPharmacy/wwwroot/mosk3.png"></img>
+<br>
+<img src="https://github.com/Kadirgvn92/MoskPharmacy/blob/master/MoskPharmacy/wwwroot/mosk2.png"></img>
+<br>
+<img src="https://github.com/Kadirgvn92/MoskPharmacy/blob/master/MoskPharmacy/wwwroot/mosk1.png"></img>
+<br>
