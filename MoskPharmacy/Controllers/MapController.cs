@@ -61,7 +61,7 @@ public class MapController : Controller
             _context.Drawings.Remove(values);
             _context.SaveChanges();
         }
-        return RedirectToAction("GetGeo");
+        return RedirectToAction("Index");
     }
     [HttpGet]
     public IActionResult UpdateGeo(int id)
@@ -69,10 +69,28 @@ public class MapController : Controller
         var values = _context.Drawings.Find(id);
         var model = new UpdateDrawingViewModel()
         {
+            DrawingId = values.DrawingId,
             Name = values.Name,
             Type = values.Type,
             Description = values.Description,
         };
+        return View(model);
+    }
+    [HttpPost]
+    public IActionResult UpdateGeo(UpdateDrawingViewModel model)
+    {
+        var values = _context.Drawings.Find(model.DrawingId);
+
+        if( values != null)
+        {
+            values.Name = model.Name;
+            values.Description = model.Description;
+            values.Type = model.Type;
+            _context.Update(values);
+            _context.SaveChanges();
+
+            return RedirectToAction("Index");
+        }
         return View(model);
     }
 }

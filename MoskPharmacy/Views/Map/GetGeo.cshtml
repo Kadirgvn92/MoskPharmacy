@@ -35,10 +35,11 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var item in Model)
+                                    @foreach (var item in Model.OrderBy(x => x.DrawingId))
                                     {
                                         count++;
                                         <tr>
+
                                             <td>@count</td>
                                             <td>@item.Name </td>
                                             <td>@item.Description </td>
@@ -50,13 +51,18 @@
                                                     int indexEnd = content.IndexOf(')');
                                                     string coordinates = content.Substring(indexStart, indexEnd - indexStart);
                                                     string result = coordinates.Replace(' ', ',');
-                                                    if(result.StartsWith("("))
+                                                    if (result.StartsWith("("))
                                                     {
-                                                       result = result.Substring(1);
+                                                        result = result.Substring(1);
 
                                                     }
+                                                    if (result.Length > 100)
+                                                    {
+                                                        result = result.Substring(0, 80);
+                                                    }
                                                 }
-                                                @result</td>
+                                                @result...
+                                            </td>
                                             <td class="align-middle" width="120px"><a href="/Map/DeleteGeo/@item.DrawingId" class="btn btn-danger">Sil</a></td>
                                             <td class="align-middle" width="120px"><a href="/Map/UpdateGeo/@item.DrawingId" class="btn btn-warning">Güncelle</a></td>
                                         </tr>
@@ -64,9 +70,9 @@
                                 </tbody>
                             </table>
                         </div>
+                    </div>
                 </div>
-            </div>
-        </div><!-- /.container-fluid -->
+            </div><!-- /.container-fluid -->
     </section>
 </div>
 
@@ -116,14 +122,17 @@
 
         // Leaflet haritasına geometriyi ekle
         <text>
-                var geoJsonFeature = @Html.Raw(geoJson);
+                                var geoJsonFeature = @Html.Raw(geoJson);
 
-        L.geoJSON(geoJsonFeature).addTo(map);
+        L.geoJSON(geoJsonFeature, {
+            onEachFeature: function (feature, layer) {
+                layer.bindPopup("<b>İsim:</b> @drawing.Name <br> <b>Açıklama:</b> @drawing.Description");
+            }
+        }).addTo(map);
+
         </text>
-    }
-
-
-
+    };
+   
 
 </script>
 

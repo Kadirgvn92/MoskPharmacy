@@ -23,6 +23,8 @@
                                 <!-- table section -->
                                 <form method="post" enctype="multipart/form-data">
                                     <input type="hidden" asp-for="DrawingId" />
+                                    <input type="hidden" asp-for="Geometry"/>
+                                    <input type="hidden" asp-for="CreatedAt"/>
                                     <div class="form-group p-1">
                                         <label>Şekil Adı</label>
                                         <input type="text" class="form-control form-control-s" asp-for="Name" placeholder="Şekil adı girin">

@@ -59,33 +59,15 @@
 
         drawnItems.addLayer(layer);
 
+
+
         var geoJsonObject = layer.toGeoJSON();
+
+        console.log(geoJsonObject);
 
         drawnGeoJSON = JSON.stringify(geoJsonObject.geometry);
 
-        // saveGeoJson();
 
-        // function saveGeoJson() {
-
-        //     var datas = JSON.stringify(geoJsonObject.geometry);
-
-        //     $.ajax({
-        //         url: "/Map/SaveGeoJson/", // Controller action URL'si
-        //         type: 'POST',
-        //         contentType: 'application/json',
-        //         data: datas,
-        //         success: function (response) {
-        //             // Başarılı işlem durumunda yapılacaklar
-        //             console.log(response);
-        //             alert('GeoJSON data saved successfully.');
-        //         },
-        //         error: function (xhr, status, error) {
-        //             // Hata durumunda yapılacaklar
-        //             console.error(xhr.responseText);
-        //             alert('Error occurred while saving GeoJSON data.');
-        //         }
-        //     });
-        // };
     });
 
 
@@ -180,7 +162,9 @@
     var layers = L.control.layers(baseMaps, overMap).addTo(map);
 
     var geos = L.layerGroup();
-
+    var polygonGroup = L.layerGroup();
+    var points = L.layerGroup();
+    var lines = L.layerGroup();
 
     @foreach (var drawing in Model)
     {
@@ -189,10 +173,52 @@
 
         // Leaflet haritasına geometriyi ekle
         <text>
-                                        var geoJsonFeature = @Html.Raw(geoJson);
+        var geoJsonFeature = @Html.Raw(geoJson);
 
-        var geo = L.geoJSON(geoJsonFeature);
+        var geo = L.geoJSON(geoJsonFeature, {
+            onEachFeature: function (feature, layer) {
+                layer.bindPopup('<b>İsim:</b> @drawing.Name <br> <b>Açıklama:</b> @drawing.Description<br> <a href="/Map/UpdateGeo/@drawing.DrawingId" class="btn btn-xs bg-dark">Güncelle</a>&nbsp; <a href="/Map/DeleteGeo/@drawing.DrawingId" class="btn btn-xs bg-danger">Sil</a>');
+            }
+        });
         geos.addLayer(geo);
+
+
+        if ('@drawing.Type' === 'Polygon') {
+            layer = L.geoJSON(geoJsonFeature, {
+                style: {
+                    fillColor: 'red',  // Alanın iç rengi
+                    color: 'red',      // Alanın kenar çizgisi rengi
+                    weight: 2          // Alanın kenar çizgisi kalınlığı
+                },
+                onEachFeature: function (feature, layer) {
+                    layer.bindPopup('<b>İsim:</b> @drawing.Name <br> <b>Açıklama:</b> @drawing.Description<br> <a href="/Map/UpdateGeo/@drawing.DrawingId" class="btn btn-xs bg-dark">Güncelle</a>&nbsp; <a href="/Map/DeleteGeo/@drawing.DrawingId" class="btn btn-xs bg-danger">Sil</a>');
+                }
+            });
+            polygonGroup.addLayer(layer);
+        };
+
+        if ('@drawing.Type' === 'Point') {
+            pointLayer = L.geoJSON(geoJsonFeature, {
+                onEachFeature: function (feature, layer) {
+                    layer.bindPopup('<b>İsim:</b> @drawing.Name <br> <b>Açıklama:</b> @drawing.Description<br> <a href="/Map/UpdateGeo/@drawing.DrawingId" class="btn btn-xs bg-dark">Güncelle</a>&nbsp; <a href="/Map/DeleteGeo/@drawing.DrawingId" class="btn btn-xs bg-danger">Sil</a>');
+                }
+            });
+            points.addLayer(pointLayer);
+        };
+
+        if ('@drawing.Type' === 'LineString') {
+            line = L.geoJSON(geoJsonFeature, {
+                style:{
+                    fillColor:'purple',
+                    color:'purple',
+                    weight:6
+                },
+                onEachFeature: function (feature, layer) {
+                    layer.bindPopup('<b>İsim:</b> @drawing.Name <br> <b>Açıklama:</b> @drawing.Description<br> <a href="/Map/UpdateGeo/@drawing.DrawingId" class="btn btn-xs bg-dark">Güncelle</a>&nbsp; <a href="/Map/DeleteGeo/@drawing.DrawingId" class="btn btn-xs bg-danger">Sil</a>');
+                }
+            });
+            lines.addLayer(line);
+        };
 
 
         </text>
@@ -200,5 +226,7 @@
 
 
     layers.addOverlay(geos, "Şekiller");
-
+    layers.addOverlay(polygonGroup, "Alan");
+    layers.addOverlay(points, "Lokasyon");
+    layers.addOverlay(lines, "Düzlem");
 </script>
