@@ -6,6 +6,7 @@
 @{
     ViewData["Title"] = "GetGeo";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    int count = 0;
 }
 
 
@@ -17,8 +18,52 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-12">
-                    <div id="map" style="height:800px">
+                    <div id="map" style="height:600px">
                     </div>
+                    <div class="table_section padding_infor_info">
+                        <div class="table-responsive-sm">
+                            <table class="table table-striped text-dark">
+                                <thead>
+                                    <tr class=" text-dark font-weight-bold">
+                                        <th scope="col">#</th>
+                                        <th scope="col">İsim</th>
+                                        <th scope="col">Açıklama</th>
+                                        <th scope="col">Tipi</th>
+                                        <th scope="col">Koordinatlar</th>
+                                        <th scope="col">Sil</th>
+                                        <th scope="col">Güncelle</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        count++;
+                                        <tr>
+                                            <td>@count</td>
+                                            <td>@item.Name </td>
+                                            <td>@item.Description </td>
+                                            <td>@item.Type </td>
+                                            <td>
+                                                @{
+                                                    var content = item.Geometry.ToString();
+                                                    int indexStart = content.IndexOf('(') + 1;
+                                                    int indexEnd = content.IndexOf(')');
+                                                    string coordinates = content.Substring(indexStart, indexEnd - indexStart);
+                                                    string result = coordinates.Replace(' ', ',');
+                                                    if(result.StartsWith("("))
+                                                    {
+                                                       result = result.Substring(1);
+
+                                                    }
+                                                }
+                                                @result</td>
+                                            <td class="align-middle" width="120px"><a href="/Map/DeleteGeo/@item.DrawingId" class="btn btn-danger">Sil</a></td>
+                                            <td class="align-middle" width="120px"><a href="/Map/UpdateGeo/@item.DrawingId" class="btn btn-warning">Güncelle</a></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
                 </div>
             </div>
         </div><!-- /.container-fluid -->
@@ -28,12 +73,41 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 <script>
-    var map = L.map('map').setView([40.2201, 28.9896], 12);
+    var map = L.map('map').setView([40.2201, 28.9896], 11);
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
+
+
+    var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: 'Osm Katmanı'
+    });
+
+    var osmHOT = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: 'Osm Hot Katmanı'
+    });
+
+    var osmFr = L.tileLayer('http://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
+        maxZoom: 19
+    }).addTo(map);
+
+    var baseMaps = {
+        "OpenStreetMap": osm,
+        "OpenStreetMap.HOT": osmHOT,
+
+    };
+
+    var overMap = {
+        "OpenStreetMap.Fr": osmFr
+    }
+
+    L.control.layers(baseMaps, overMap).addTo(map);
+
 
     @foreach (var drawing in Model)
     {
@@ -42,21 +116,15 @@
 
         // Leaflet haritasına geometriyi ekle
         <text>
-                    var geoJsonFeature = @Html.Raw(geoJson);
+                var geoJsonFeature = @Html.Raw(geoJson);
+
         L.geoJSON(geoJsonFeature).addTo(map);
         </text>
     }
 
 
-    // values.forEach(function (drawing) {
-    //     var geojsonFeature = {
-    //         "type": JSON.parse(drawing.type),
-    //         "geometry": JSON.parse(drawing.geometry) // Assuming drawing.geometry is already in geojson format as a string
-    //     };
 
-    //     L.geoJSON(geojsonFeature).addTo(map);
-    // });
-    
+
 </script>
 
 

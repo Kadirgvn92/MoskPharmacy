@@ -23,7 +23,8 @@ public class MapController : Controller
 
     public IActionResult Index()
     {
-        return View();
+        var values = _context.Drawings.ToList();
+        return View(values);
     }
     [HttpPost]
     public IActionResult SaveGeoJson([FromBody] JsonObject geoJsonData)
@@ -50,5 +51,28 @@ public class MapController : Controller
 
 
         return View(values);
+    }
+
+    public IActionResult DeleteGeo(int id)
+    {
+        var values = _context.Drawings.Find(id);
+        if(values != null)
+        {
+            _context.Drawings.Remove(values);
+            _context.SaveChanges();
+        }
+        return RedirectToAction("GetGeo");
+    }
+    [HttpGet]
+    public IActionResult UpdateGeo(int id)
+    {
+        var values = _context.Drawings.Find(id);
+        var model = new UpdateDrawingViewModel()
+        {
+            Name = values.Name,
+            Type = values.Type,
+            Description = values.Description,
+        };
+        return View(model);
     }
 }

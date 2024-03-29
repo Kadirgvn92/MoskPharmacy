@@ -1,4 +1,6 @@
-﻿@{
+﻿@model List<Drawing>
+
+@{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
@@ -44,10 +46,13 @@
         },
         edit: {
             featureGroup: drawnItems,
-            remove: true, 
+            remove: true,
         }
     });
     map.addControl(drawControl);
+
+    var drawnGeoJSON;//çizilmiş şekli saklamak için değişken
+
 
     map.on('draw:created', function (e) {
         var layer = e.layer;
@@ -56,13 +61,74 @@
 
         var geoJsonObject = layer.toGeoJSON();
 
-        console.log(geoJsonObject.geometry);
+        drawnGeoJSON = JSON.stringify(geoJsonObject.geometry);
 
-        saveGeoJson();
+        // saveGeoJson();
 
-        function saveGeoJson() {
+        // function saveGeoJson() {
 
-            var datas = JSON.stringify(geoJsonObject.geometry);
+        //     var datas = JSON.stringify(geoJsonObject.geometry);
+
+        //     $.ajax({
+        //         url: "/Map/SaveGeoJson/", // Controller action URL'si
+        //         type: 'POST',
+        //         contentType: 'application/json',
+        //         data: datas,
+        //         success: function (response) {
+        //             // Başarılı işlem durumunda yapılacaklar
+        //             console.log(response);
+        //             alert('GeoJSON data saved successfully.');
+        //         },
+        //         error: function (xhr, status, error) {
+        //             // Hata durumunda yapılacaklar
+        //             console.error(xhr.responseText);
+        //             alert('Error occurred while saving GeoJSON data.');
+        //         }
+        //     });
+        // };
+    });
+
+
+    map.on('draw:edited', function (e) {
+        var layers = e.layers;
+        layers.eachLayer(function (layer) {
+
+
+            console.log('Layer edited:', layer.toGeoJSON());
+        });
+    });
+
+    map.on('draw:deleted', function (e) {
+        if (e.layers) {
+            var layers = e.layers;
+            layers.eachLayer(function (layer) {
+                console.log('Layer deleted:', layer);
+            });
+        }
+    });
+
+
+    function createSaveButton() {
+        var saveButton = L.Control.extend({
+            options: {
+                position: 'topright'
+            },
+            onAdd: function (map) {
+                var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+
+                container.innerHTML = '<button onclick="saveGeoJson()">Save</button>';
+
+                return container;
+            }
+        });
+
+        map.addControl(new saveButton());
+    }
+
+    // Butona tıklandığında geoJSON'u post etme fonksiyonu
+    function saveGeoJson() {
+        if (drawnGeoJSON) {
+            var datas = drawnGeoJSON;
 
             $.ajax({
                 url: "/Map/SaveGeoJson/", // Controller action URL'si
@@ -80,27 +146,59 @@
                     alert('Error occurred while saving GeoJSON data.');
                 }
             });
-        };
-    });
-
-    
-
-
-    map.on('draw:edited', function (e) {
-        if (e.layers) {
-            var layers = e.layers;
-            layers.eachLayer(function (layer) {
-                console.log('Layer edited:', layer.toGeoJSON());
-            });
         }
+    }
+
+    // Buton oluşturma işlemini çağır
+    createSaveButton();
+
+    var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: 'Osm Katmanı'
     });
 
-    map.on('draw:deleted', function (e) {
-        if (e.layers) {
-            var layers = e.layers;
-            layers.eachLayer(function (layer) {
-                console.log('Layer deleted:', layer);
-            });
-        }
+    var osmHOT = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: 'Osm Hot Katmanı'
     });
+
+    var osmFr = L.tileLayer('http://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
+        maxZoom: 19
+    }).addTo(map);
+
+    var baseMaps = {
+        "Osm": osm,
+        "Osm.HOT": osmHOT,
+
+    };
+
+    var overMap = {
+        "Osm.Fr": osmFr
+    };
+
+    var layers = L.control.layers(baseMaps, overMap).addTo(map);
+
+    var geos = L.layerGroup();
+
+
+    @foreach (var drawing in Model)
+    {
+        // Geometry'i GeoJSON formatına dönüştür
+        string geoJson = GeometryConverter.WktToGeoJson(drawing.Geometry.ToString());
+
+        // Leaflet haritasına geometriyi ekle
+        <text>
+                                        var geoJsonFeature = @Html.Raw(geoJson);
+
+        var geo = L.geoJSON(geoJsonFeature);
+        geos.addLayer(geo);
+
+
+        </text>
+    };
+
+
+    layers.addOverlay(geos, "Şekiller");
+
 </script>

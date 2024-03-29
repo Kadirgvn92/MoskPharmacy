@@ -34,10 +34,47 @@
         maxZoom: 19,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
+
+    var userLocationGroup = new L.FeatureGroup().addTo(map);
     
+    function locateUser(){
+        map.locate({
+            enableHighAccuracy: true,
+            watch:true,
+            maxZoom: 16
+        });
+    }
+   
+    locateUser();
+
+    map.on('locationfound', function (e) {
+        var userMarker = L.marker(e.latlng).addTo(map);
+        userMarker.bindPopup("Konumunuz").openPopup();
+        userLocationGroup.addLayer(userMarker);
+    });
+
+    var locateButton = L.control({ position: 'topright' });
+
+    locateButton.onAdd = function (map) {
+        var div = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+        div.innerHTML = '<button><img src="/loc.png" width="30px" height="32px"/></button>';
+        div.onclick = function () {
+            locateUser();
+        }
+        return div;
+    };
+
+    locateButton.addTo(map);
+
     var pharmacies = @Html.Raw(Json.Serialize(Model));
 
-    pharmacies.forEach(function (pharmacy) {
+    console.log(pharmacies);
+
+    var list = pharmacies.$values;
+
+    console.log(list);
+
+    list.forEach(function (pharmacy) {
         var locationPharmacy = pharmacy.location.split(',');
         var latlng = [parseFloat(locationPharmacy[0]), parseFloat(locationPharmacy[1])];
         var marker = L.marker(latlng, { icon: L.icon({ iconUrl: '/eczane.jpg', iconSize:[30,30]}) }).addTo(map);
@@ -52,10 +89,6 @@
     };
 
 
-    map.locate({ 
-        watch:true,
-        maxZoom: 16 
-    });
 
     map.on('locationfound', function (e) {
         var userMarker = L.marker(e.latlng).addTo(map);
