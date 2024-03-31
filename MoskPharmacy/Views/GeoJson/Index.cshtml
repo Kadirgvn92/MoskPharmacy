@@ -10,13 +10,18 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-12">
-                    <div id="map" style="height:800px">
+                    <div id="map" style="height:600px">
                     </div>
-                    <h2>GeoJSON Dosya Yükleme</h2>
-                    <form id="uploadForm" enctype="multipart/form-data">
-                        <input type="file" id="fileInput" name="fileInput" accept=".geojson">
-                        <button type="button" onclick="uploadFile()">Dosya Yükle</button>
-                    </form>
+                    <div >
+
+                        <h3>GeoJSON Dosya Yükleme</h3>
+                        <form id="uploadForm" enctype="multipart/form-data">
+                            <input type="file" id="fileInput" name="fileInput" accept=".geojson" class="">
+                            <button type="button"  onclick="uploadFile()">Dosya Yükle</button>
+                        </form>
+
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -52,10 +57,9 @@
             })
             .then(data => {
                 console.log(data);
-                L.geoJSON(JSON.parse(data)).addTo(this.map);
+                var geoJsonLayer = L.geoJSON(JSON.parse(data)).addTo(map);
+                map.fitBounds(geoJsonLayer.getBounds());
                 alert('GeoJSON dosyası başarıyla yüklendi.');
-
-
             });
 
     };
